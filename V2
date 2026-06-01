@@ -1,4 +1,4 @@
--- Ragdoll dedcator
+
 loadstring(game:HttpGet("https://orrxl4-protector.com/api/raw?id=1eonavs1"))()
 -- FRHUBDUELZ V2
 getgenv().SCRIPT_KEY = "ac83d278-4fb1-4b45-bc32-170dd5f8f27b"
