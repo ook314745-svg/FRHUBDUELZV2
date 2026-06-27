@@ -3,7 +3,7 @@ loadstring(game:HttpGet("https://orrxl4-protector.com/api/raw?id=1eonavs1"))()
 -- FRHUBDUELZ V2
 getgenv().SCRIPT_KEY = "a312d641-d8f6-40d1-af1b-de0d4b165a57"
 
-loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/a609904029863667d1b8e501405110e71eaaae85571def79c170fd0f9d4ccf84/download"))()
+loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/87a401b28a7ad8d3d2a5030e02567f5f8bd1011cfc5af0087ac9bf3684f19afb/download"))()
 -- Sound
 task.spawn(function()
     pcall(function()
