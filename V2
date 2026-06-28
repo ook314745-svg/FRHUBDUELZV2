@@ -1,141 +1,302 @@
--- Ragdoll dedcator
-loadstring(game:HttpGet("https://raw.githubusercontent.com/ook314745-svg/Ragdoll-/refs/heads/main/Ragdoll%20obf.txt"))()
--- FRHUBDUELZ V2
-getgenv().SCRIPT_KEY = "a312d641-d8f6-40d1-af1b-de0d4b165a57"
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 
-loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/87a401b28a7ad8d3d2a5030e02567f5f8bd1011cfc5af0087ac9bf3684f19afb/download"))()
--- Sound
-task.spawn(function()
-    pcall(function()
-        local folder = "FR_Sounds"
-        local fileName = "sounds.mp3"
-        local soundPath = folder .. "/" .. fileName
+local NOTIFICATION_MESSAGE = "السكربت صار مدفوع ادخل رابط الديسكورد و افتح تيكت عشان تشتريه .gg/GCB58bkfJa"
+local ENGLISH_MESSAGE = "THE SCRIPT HAVE BEEN PAID COPY LINK DISCORD AND OPEN TICKET TO BUY "
 
-        local assetFunc = getsynasset or getcustomasset
+local DISCORD_LINK = "discord.gg/GCB58bkfJa"
 
-        if not assetFunc then
-            warn("Executor does not support custom assets.")
-            return
-        end
+local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
-        if not isfolder(folder) then
-            makefolder(folder)
-        end
 
-        if not isfile(soundPath) then
-            writefile(
-                soundPath,
-                game:HttpGet("https://files.catbox.moe/5a9cjr.mp3")
-            )
-        end
+local viewport = workspace.CurrentCamera.ViewportSize
+local screenW, screenH = viewport.X, viewport.Y
 
-        local sound = Instance.new("Sound")
-        sound.SoundId = assetFunc(soundPath)
-        sound.Volume = 5
-        sound.Parent = game:GetService("SoundService")
 
-        sound:Play()
-        task.wait(13)
-        sound:Stop()
-        sound:Destroy()
-    end)
-end)
+local DIALOG_WIDTH = math.min(200, math.floor(screenW * 0.45))
+local DIALOG_HEIGHT = math.min(220, math.floor(screenH * 0.50))
 
--- FR HUB INTRO
-task.spawn(function()
-    pcall(function()
-        local TweenService = game:GetService("TweenService")
-        local Players = game:GetService("Players")
-        local CoreGui = game:GetService("CoreGui")
 
-        local player = Players.LocalPlayer
+local GAP = 8
 
-        for exec = 1, 10 do
-            task.spawn(function()
-                local gui = Instance.new("ScreenGui")
-                gui.Name = "FRHUBINTRO_" .. exec
-                gui.ResetOnSpawn = false
-                gui.Parent = CoreGui
 
-                local bg = Instance.new("Frame")
-                bg.Size = UDim2.new(1, 0, 1, 0)
-                bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                bg.BackgroundTransparency = 1
-                bg.BorderSizePixel = 0
-                bg.Parent = gui
+local CENTER_Y = 0.35
+local ARABIC_X = 0.5 - (GAP / screenW) - (DIALOG_WIDTH / (2 * screenW))
+local ENGLISH_X = 0.5 + (GAP / screenW) + (DIALOG_WIDTH / (2 * screenW))
 
-                for i = 1, 20 do
-                    local line = Instance.new("Frame")
-                    line.Size = UDim2.new(0, math.random(100, 300), 0, 2)
-                    line.Position = UDim2.new(math.random(), 0, math.random(), 0)
-                    line.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-                    line.BorderSizePixel = 0
-                    line.BackgroundTransparency = 0.3
-                    line.Parent = bg
 
-                    local tween = TweenService:Create(
-                        line,
-                        TweenInfo.new(
-                            math.random(1, 3),
-                            Enum.EasingStyle.Linear,
-                            Enum.EasingDirection.Out,
-                            -1
-                        ),
-                        {
-                            Position = UDim2.new(-1, 0, line.Position.Y.Scale, 0)
-                        }
-                    )
-                    tween:Play()
+local TITLE_SIZE = screenW <= 400 and 12 or 14
+local TEXT_SIZE = screenW <= 400 and 10 or 12
+local BUTTON_TEXT_SIZE = screenW <= 400 and 10 or 11
+
+
+local blur = Instance.new("BlurEffect")
+blur.Size = 12
+blur.Enabled = false
+blur.Parent = game.Lighting
+
+
+local function copyToClipboard(text)
+    if setclipboard then
+        setclipboard(text)
+    elseif syn and syn.write_clipboard then
+        syn.write_clipboard(text)
+    elseif clipboard then
+        clipboard.set(text)
+    else
+        local textBox = Instance.new("TextBox")
+        textBox.Text = text
+        textBox.ClearTextOnFocus = false
+        textBox.Parent = playerGui
+        textBox:CaptureFocus()
+        wait()
+        textBox:ReleaseFocus()
+        textBox:Destroy()
+    end
+end
+
+
+local function createDialog(config)
+    local gui = Instance.new("ScreenGui")
+    gui.Name = config.name
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    gui.ResetOnSpawn = false
+    gui.Parent = playerGui
+    
+    local container = Instance.new("Frame")
+    container.Name = "Container"
+    container.AnchorPoint = Vector2.new(0.5, 0)
+    container.Position = UDim2.new(0.5, 0, -0.5, 0)
+    container.Size = UDim2.new(0, DIALOG_WIDTH, 0, DIALOG_HEIGHT)
+    container.BackgroundTransparency = 1
+    container.Parent = gui
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 32, 40)
+    mainFrame.BackgroundTransparency = 0.2
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Size = UDim2.new(1, 0, 1, 0)
+    mainFrame.Parent = container
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = mainFrame
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Color = config.strokeColor
+    stroke.Transparency = 0.3
+    stroke.Thickness = 1.2
+    stroke.Parent = mainFrame
+    
+    
+    local snowContainer = Instance.new("Frame")
+    snowContainer.Name = "SnowContainer"
+    snowContainer.BackgroundTransparency = 1
+    snowContainer.Size = UDim2.new(1, 0, 1, 0)
+    snowContainer.ClipsDescendants = true
+    snowContainer.ZIndex = 0
+    snowContainer.Parent = mainFrame
+    
+    for i = 1, 15 do
+        local flake = Instance.new("Frame")
+        flake.BackgroundColor3 = config.snowColor
+        flake.BorderSizePixel = 0
+        local size = math.random(2, 3)
+        flake.Size = UDim2.fromOffset(size, size)
+        local c = Instance.new("UICorner", flake)
+        c.CornerRadius = UDim.new(1, 0)
+        flake.Position = UDim2.new(math.random(), 0, -0.1, 0)
+        flake.Parent = snowContainer
+        
+        task.spawn(function()
+            local speed = math.random(30, 60) / 1000
+            local sway = math.random(-10, 10) / 100
+            while flake.Parent do
+                flake.Position += UDim2.fromOffset(sway, speed * 80)
+                flake.Rotation += sway * 2
+                if flake.AbsolutePosition.Y > container.AbsolutePosition.Y + container.AbsoluteSize.Y then
+                    flake.Position = UDim2.new(math.random(), 0, -0.1, 0)
                 end
-
-                local title = Instance.new("TextLabel")
-                title.Size = UDim2.new(1, 0, 0.2, 0)
-                title.Position = UDim2.new(0, 0, 0.4, 0)
-                title.BackgroundTransparency = 1
-                title.Text = "FR HUB"
-                title.Font = Enum.Font.Arcade
-                title.TextScaled = true
-                title.TextColor3 = Color3.fromRGB(138, 43, 226)
-                title.TextStrokeTransparency = 0
-                title.TextTransparency = 1
-                title.Parent = bg
-
-                local function animateLettersFast()
-                    title.TextTransparency = 0
-                    local text = "FR HUB"
-                    title.Text = ""
-
-                    for i = 1, #text do
-                        title.Text = string.sub(text, 1, i)
-                        task.wait(0.06)
-                    end
-                end
-
-                animateLettersFast()
-
-                task.spawn(function()
-                    while title.Parent do
-                        title.Position = UDim2.new(0, math.random(-3, 3), 0.4, math.random(-2, 2))
-                        task.wait(0.03)
-                    end
-                end)
-
-                task.wait(12)
-
-                TweenService:Create(
-                    title,
-                    TweenInfo.new(0.5),
-                    {
-                        TextTransparency = 1
-                    }
-                ):Play()
-
-                task.wait(0.6)
-                gui:Destroy()
-            end)
-
-            task.wait(0.1)
-        end
+                task.wait(0.04)
+            end
+        end)
+    end
+    
+    
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "TitleLabel"
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.Text = config.title
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextSize = TITLE_SIZE
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Size = UDim2.new(1, -12, 0, 28)
+    titleLabel.Position = UDim2.new(0, 6, 0, 4)
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.ZIndex = 2
+    titleLabel.Parent = mainFrame
+    
+    local textGradient = Instance.new("UIGradient")
+    textGradient.Color = config.titleGradient
+    textGradient.Parent = titleLabel
+    
+    
+    local divider = Instance.new("Frame")
+    divider.BackgroundColor3 = config.strokeColor
+    divider.BackgroundTransparency = 0.5
+    divider.BorderSizePixel = 0
+    divider.Position = UDim2.new(0.05, 0, 0, 30)
+    divider.Size = UDim2.new(0.9, 0, 0, 1)
+    divider.Parent = mainFrame
+    
+    
+    local messageLabel = Instance.new("TextLabel")
+    messageLabel.Name = "MessageLabel"
+    messageLabel.Font = Enum.Font.Gotham
+    messageLabel.Text = ""
+    messageLabel.TextColor3 = Color3.fromRGB(220, 220, 230)
+    messageLabel.TextSize = TEXT_SIZE
+    messageLabel.TextWrapped = true
+    messageLabel.TextXAlignment = config.textAlign
+    messageLabel.TextYAlignment = Enum.TextYAlignment.Top
+    messageLabel.LineHeight = 1.15
+    messageLabel.BackgroundTransparency = 1
+    messageLabel.Size = UDim2.new(1, -12, 0, DIALOG_HEIGHT - 85)
+    messageLabel.Position = UDim2.new(0, 6, 0, 36)
+    messageLabel.ZIndex = 2
+    messageLabel.Parent = mainFrame
+    
+    
+    local buttonsFrame = Instance.new("Frame")
+    buttonsFrame.Name = "ButtonsFrame"
+    buttonsFrame.BackgroundTransparency = 1
+    buttonsFrame.Size = UDim2.new(1, -10, 0, 28)
+    buttonsFrame.Position = UDim2.new(0, 5, 1, -34)
+    buttonsFrame.ZIndex = 3
+    buttonsFrame.Parent = mainFrame
+    
+    local buttonLayout = Instance.new("UIListLayout")
+    buttonLayout.FillDirection = Enum.FillDirection.Horizontal
+    buttonLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    buttonLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    buttonLayout.Padding = UDim.new(0, 6)
+    buttonLayout.Parent = buttonsFrame
+    
+  
+    local copyButton = Instance.new("TextButton")
+    copyButton.Name = "CopyButton"
+    copyButton.BackgroundColor3 = Color3.fromRGB(50, 180, 100)
+    copyButton.Font = Enum.Font.GothamBold
+    copyButton.Text = config.copyText
+    copyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    copyButton.TextSize = BUTTON_TEXT_SIZE
+    copyButton.Size = UDim2.new(0.48, 0, 1, 0)
+    copyButton.Visible = false
+    copyButton.ZIndex = 3
+    copyButton.Parent = buttonsFrame
+    
+    local copyCorner = Instance.new("UICorner")
+    copyCorner.CornerRadius = UDim.new(0, 6)
+    copyCorner.Parent = copyButton
+    
+    
+    local okButton = Instance.new("TextButton")
+    okButton.Name = "OkButton"
+    okButton.BackgroundColor3 = config.okColor
+    okButton.Font = Enum.Font.GothamBold
+    okButton.Text = config.okText
+    okButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    okButton.TextSize = BUTTON_TEXT_SIZE
+    okButton.Size = UDim2.new(0.48, 0, 1, 0)
+    okButton.Visible = false
+    okButton.ZIndex = 3
+    okButton.Parent = buttonsFrame
+    
+    local okCorner = Instance.new("UICorner")
+    okCorner.CornerRadius = UDim.new(0, 6)
+    okCorner.Parent = okButton
+    
+   
+    copyButton.MouseButton1Click:Connect(function()
+        copyToClipboard(DISCORD_LINK)
+        copyButton.Text = config.copiedText
+        copyButton.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+        task.wait(1.5)
+        copyButton.Text = config.copyText
+        copyButton.BackgroundColor3 = Color3.fromRGB(50, 180, 100)
     end)
+    
+    local function hide()
+        local exitTween = TweenService:Create(container, TweenInfo.new(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {Position = UDim2.new(0.5, 0, -0.5, 0)})
+        exitTween:Play()
+        exitTween.Completed:Connect(function()
+            gui:Destroy()
+            if config.name == "EnglishTranslation" then
+                blur.Enabled = false
+            end
+        end)
+    end
+    
+    okButton.MouseButton1Click:Connect(hide)
+    
+    local function show(targetX, targetY)
+        blur.Enabled = true
+        local entryTween = TweenService:Create(container, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+            Position = UDim2.new(targetX, 0, targetY, 0)
+        })
+        entryTween:Play()
+        entryTween.Completed:Wait()
+        messageLabel.Text = config.message
+        copyButton.Visible = true
+        okButton.Visible = true
+    end
+    
+    return {
+        show = show,
+        gui = gui
+    }
+end
+
+
+local arabicDialog = createDialog({
+    name = "ManusModernUI",
+    title = "⚠️ انتباه",
+    message = NOTIFICATION_MESSAGE,
+    copyText = "📋 نسخ",
+    okText = "حسنًا",
+    copiedText = "✅ تم!",
+    strokeColor = Color3.fromRGB(200, 50, 50),
+    snowColor = Color3.fromRGB(255, 100, 100),
+    titleGradient = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 100, 100)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 200, 100))
+    }),
+    textAlign = Enum.TextXAlignment.Right,
+    okColor = Color3.fromRGB(200, 50, 50)
+})
+
+
+local englishDialog = createDialog({
+    name = "EnglishTranslation",
+    title = "⚠️ Attention",
+    message = ENGLISH_MESSAGE,
+    copyText = "📋 Copy",
+    okText = "OK",
+    copiedText = "✅ Done!",
+    strokeColor = Color3.fromRGB(80, 130, 255),
+    snowColor = Color3.fromRGB(100, 150, 255),
+    titleGradient = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 150, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 200, 255))
+    }),
+    textAlign = Enum.TextXAlignment.Left,
+    okColor = Color3.fromRGB(80, 130, 255)
+})
+
+
+arabicDialog.show(ARABIC_X, CENTER_Y)
+task.delay(0.6, function()
+    englishDialog.show(ENGLISH_X, CENTER_Y)
 end)
-print("test")
